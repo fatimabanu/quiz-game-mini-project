@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Guess the Logo - Quiz </title>
+
+<style>
+/* GENERAL */
+body {
+    margin: 0;
+    font-family: "Poppins", Arial;
+    background: #E9D6FF;
+    overflow-x: hidden;
+}
+
+.page {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: fade 0.5s ease;
+}
+.active { display: block; }
+
+@keyframes fade {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* CONTAINER CARD */
+.container {
+    background: white;
+    width: 440px;
+    margin: auto;
+    padding: 40px;
+    border-radius: 22px;
+    box-shadow: 0 0 25px rgba(110, 0, 167, 0.25);
+}
+
+/* INPUT + BUTTONS */
+input {
+    width: 90%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #b486d1;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 12px 28px;
+    background: #CBA7FF;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 8px;
+    transition: 0.25s;
+}
+button:hover {
+    background: #AA75FF;
+    transform: translateY(-3px);
+}
+
+/* OPTIONS */
+.option-btn {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    padding: 14px;
+    background: #E3D1FF;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 17px;
+    border: 2px solid transparent;
+    transition: 0.25s;
+}
+.option-btn:hover {
+    background: #B88CFF;
+    color: white;
+}
+.option-selected {
+    background: #8A47FF !important;
+    color: white;
+    border: 2px solid #5c1bc8;
+}
+
+/* QUIZ CARD */
+.quiz-card {
+    background: white;
+    width: 470px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(110, 0, 167, 0.25);
+}
+
+/* NAV BUTTONS */
+.nav-btn {
+    background: #CBA7FF;
+    padding: 10px 22px;
+    border-radius: 8px;
+}
+.nav-btn:hover {
+    background: #AA75FF;
+}
+
+/* INSTRUCTIONS */
+.instructions {
+    font-size: 14px;
+    color: #6a00a0;
+    margin-top: -12px;
+    margin-bottom: 22px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page active">
+    <div class="container">
+        <h2 style="color:#6a00a0;">Guess the Logo</h2>
+        <p class="instructions">Identify the correct brand based on the displayed logo.<br>
+        Select one option for each question and aim for the highest score.</p>
+
+        <h3>Login</h3>
+
+        <input type="text" id="username" placeholder="Enter Username">
+
+        <button onclick="login()">Login</button>
+        <p style="font-size:14px; color:#6a00a0;">OR</p>
+        <button onclick="guest()">Continue as Guest</button>
+    </div>
+</div>
+
+<!-- HOME PAGE -->
+<div id="homePage" class="page">
+    <div class="container">
+        <h2 style="color:#6a00a0;">Home</h2>
+        <h3 id="welcomeText"></h3>
+
+        <button onclick="startQuiz()">Start Quiz</button>
+        <button onclick="showPage('leaderboardPage')">Leaderboard</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="quizPage" class="page">
+
+    <h2 style="color:#6a00a0;">Guess the Logo</h2>
+    <p class="instructions">Scroll through the questions and choose the right brand.</p>
+
+    <div id="quizCard" class="quiz-card"></div>
+
+    <div>
+        <button class="nav-btn" onclick="prevQ()">Previous</button>
+        <button class="nav-btn" onclick="nextQ()">Next</button>
+        <button class="nav-btn" onclick="submitQuiz()">Submit</button>
+    </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div id="leaderboardPage" class="page">
+    <div class="container">
+        <h2 style="color:#6a00a0;">Leaderboard</h2>
+
+        <h3 id="latestScore"></h3>
+        <h3 id="bestScore"></h3>
+
+        <button onclick="showPage('homePage')">Back Home</button>
+    </div>
+</div>
+
+<script>
+/* PAGE NAVIGATION */
+function showPage(id){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+/* LOGIN */
+function login(){
+    let u = document.getElementById("username").value;
+    if(u === ""){ alert("Enter your name!"); return; }
+
+    localStorage.setItem("username", u);
+    document.getElementById("welcomeText").innerText = "Welcome, " + u;
+    showPage("homePage");
+}
+
+function guest(){
+    document.getElementById("welcomeText").innerText = "Guest Mode";
+    localStorage.removeItem("username");
+    showPage("homePage");
+}
+
+function logout(){
+    localStorage.removeItem("username");
+    showPage("loginPage");
+}
+
+/* QUIZ DATA */
+const logos = [
+    { 
+        img: "tesla.png", 
+        answer: "Tesla",
+        options: ["BMW", "Tesla", "Ferrari", "Audi"]
+    },
+    { 
+        img: "starbucks.png", 
+        answer: "Starbucks", 
+        options: ["Costa Coffee", "Tim Hortons", "Starbucks", "Gloria Jean's"]
+    },
+    { 
+        img: "nike.png", 
+        answer: "Nike", 
+        options: ["Puma", "Adidas", "Nike", "Reebok"]
+    },
+    { 
+        img: "playstation.png", 
+        answer: "PlayStation", 
+        options: ["PlayStation", "Xbox", "Nintendo", "Steam"]
+    },
+    { 
+        img: "kfc.png", 
+        answer: "KFC", 
+        options: ["Burger King", "KFC", "McDonald's", "Subway"]
+    }
+];
+
+let currentQ = 0;
+let userAnswers = new Array(logos.length).fill(null);
+
+function startQuiz(){
+    currentQ = 0;
+    showPage("quizPage");
+    loadQuestion();
+}
+
+function loadQuestion(){
+    let q = logos[currentQ];
+
+    let html = `
+        <h3>Question ${currentQ+1} / ${logos.length}</h3>
+        <img src="${q.img}" width="200"><br><br>
+    `;
+
+    q.options.forEach(opt => {
+        let selected = userAnswers[currentQ] === opt ? "option-selected" : "";
+        html += `<div class="option-btn ${selected}" onclick="selectOption('${opt}')">${opt}</div>`;
+    });
+
+    document.getElementById("quizCard").innerHTML = html;
+}
+
+function selectOption(opt){
+    userAnswers[currentQ] = opt;
+    loadQuestion();
+}
+
+function nextQ(){
+    if(currentQ < logos.length - 1){
+        currentQ++;
+        loadQuestion();
+    }
+}
+
+function prevQ(){
+    if(currentQ > 0){
+        currentQ--;
+        loadQuestion();
+    }
+}
+
+function submitQuiz(){
+    let score = 0;
+
+    logos.forEach((q,i)=>{
+        if(userAnswers[i] === q.answer) score++;
+    });
+
+    localStorage.setItem("latestScore", score);
+
+    let best = localStorage.getItem("bestScore");
+    if(best === null || score > best){
+        localStorage.setItem("bestScore", score);
+    }
+
+    updateLeaderboard();
+    showPage("leaderboardPage");
+}
+
+function updateLeaderboard(){
+    document.getElementById("latestScore").innerText =
+        "Your Score: " + localStorage.getItem("latestScore") + "/5";
+
+    document.getElementById("bestScore").innerText =
+        "Best Score: " + (localStorage.getItem("bestScore") || 0) + "/5";
+}
+</script>
+
+</body>
+</html>
